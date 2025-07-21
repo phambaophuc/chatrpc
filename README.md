@@ -22,77 +22,172 @@
   <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
   [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-## Description
+# Professional Chat System
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+A scalable real-time chat system built with NestJS, GraphQL, gRPC, PostgreSQL, and Prisma.
 
-## Project setup
+## Features
 
-```bash
-$ npm install
+- 🔐 JWT Authentication with bcrypt password hashing
+- 💬 Real-time messaging with GraphQL subscriptions
+- 🚀 High-performance gRPC API
+- 🗄️ PostgreSQL database with Prisma ORM
+- 🎯 SOLID principles and clean architecture
+- 🔒 Rate limiting and security measures
+- 🧪 Comprehensive testing suite
+- 📊 Health checks and metrics
+- 🐳 Docker containerization
+
+## Tech Stack
+
+- **Backend**: NestJS, TypeScript
+- **Database**: PostgreSQL with Prisma ORM
+- **APIs**: GraphQL (Apollo Server), gRPC
+- **Authentication**: JWT with Passport
+- **Real-time**: WebSocket subscriptions, gRPC streaming
+- **Testing**: Jest
+
+## Quick Start
+
+### Local Development
+
+1. Install dependencies: `npm install`
+2. Setup PostgreSQL database
+3. Configure environment: `cp .env.example .env`
+4. Generate Prisma client: `npm run db:generate`
+5. Run migrations: `npm run db:migrate`
+6. Seed database: `npm run db:seed`
+7. Start development server: `npm run start:dev`
+
+## API Usage
+
+### GraphQL Examples
+
+```graphql
+# Register user
+mutation {
+  register(input: {
+    username: "john_doe"
+    password: "password123"
+  }) {
+    userId
+    token
+  }
+}
+
+# Login
+mutation {
+  login(input: {
+    username: "john_doe"
+    password: "password123"
+  }) {
+    userId
+    token
+  }
+}
+
+# Send message (requires authentication)
+mutation {
+  sendMessage(input: {
+    content: "Hello World!"
+  }) {
+    id
+    userId
+    content
+    timestamp
+  }
+}
+
+# Subscribe to messages
+subscription {
+  messageAdded {
+    id
+    userId
+    content
+    timestamp
+  }
+}
 ```
 
-## Compile and run the project
+### gRPC Examples
 
-```bash
-# development
-$ npm run start
+```typescript
+// Login
+const response = await authClient.login({
+  username: "john_doe",
+  password: "password123"
+});
 
-# watch mode
-$ npm run start:dev
+// Send message
+const message = await chatClient.sendMessage({
+  userId: "user_id",
+  content: "Hello from gRPC!"
+});
 
-# production mode
-$ npm run start:prod
+// Stream messages
+const stream = chatClient.streamMessages({ userId: "user_id" });
+stream.on('data', (message) => {
+  console.log('New message:', message);
+});
 ```
 
-## Run tests
+## Architecture
+
+The application follows clean architecture principles with clear separation of concerns:
+
+- **Domain Layer**: Entities and business logic
+- **Application Layer**: Services and use cases  
+- **Infrastructure Layer**: Repositories and external services
+- **Presentation Layer**: Controllers and resolvers
+
+## Testing
 
 ```bash
-# unit tests
-$ npm run test
+# Run tests
+npm run test
 
-# e2e tests
-$ npm run test:e2e
+# Run tests with coverage
+npm run test:cov
 
-# test coverage
-$ npm run test:cov
+# Run tests in watch mode
+npm run test:watch
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+## Database Management
 
 ```bash
-$ npm install -g mau
-$ mau deploy
+# Generate Prisma client
+npm run db:generate
+
+# Create and run migration
+npm run db:migrate
+
+# Seed database
+npm run db:seed
+
+# Reset database
+npm run db:reset
+
+# Open Prisma Studio
+npm run db:studio
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+## Production Deployment
 
-## Resources
+1. Build the application: `npm run build`
+2. Set production environment variables
+3. Run database migrations: `npm run db:migrate`
+4. Start the application: `npm run start:prod`
 
-Check out a few resources that may come in handy when working with NestJS:
+## Environment Variables
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+```bash
+DATABASE_URL=postgresql://username:password@localhost:5432/chat_db
+JWT_SECRET=your-super-secret-jwt-key
+NODE_ENV=development
+PORT=3000
+GRPC_PORT=5000
+```
 
 ## License
 
