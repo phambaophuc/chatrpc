@@ -1,8 +1,11 @@
 import { Module } from '@nestjs/common';
 
-import { ChatGrpcController } from '@/controllers';
 import { ChatResolver } from '@/graphql/resolvers';
-import { MessageRepository, UserRepository } from '@/repositories';
+import {
+  MessageRepository,
+  RoomMemberRepository,
+  UserRepository,
+} from '@/repositories';
 import { ChatService } from '@/services';
 import { PrismaService } from '@/shared/services';
 
@@ -18,11 +21,10 @@ import { PrismaService } from '@/shared/services';
       useClass: MessageRepository,
     },
     {
-      provide: 'IUserRepository',
-      useClass: UserRepository,
+      provide: 'IRoomMemberRepository',
+      useClass: RoomMemberRepository,
     },
   ],
-  controllers: [ChatGrpcController],
   exports: [ChatService],
 })
 export class ChatModule {}

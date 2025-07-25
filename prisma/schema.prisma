@@ -17,23 +17,89 @@ datasource db {
 model User {
   id        String   @id @default(cuid())
   username  String   @unique
+  email     String?  @unique
   password  String
+  avatar    String?
+  isOnline  Boolean  @default(false)
+  lastSeen  DateTime @default(now())
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  messages Message[]
+  messages     Message[]
+  roomMembers  RoomMember[]
+  createdRooms Room[]       @relation("RoomCreator")
 
   @@map("users")
 }
 
-model Message {
-  id        String   @id @default(cuid())
-  content   String
-  userId    String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model Room {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  type        RoomType @default(PUBLIC)
+  avatar      String?
+  creatorId   String
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  creator  User         @relation("RoomCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+  messages Message[]
+  members  RoomMember[]
+
+  @@map("rooms")
+}
+
+model RoomMember {
+  id       String         @id @default(cuid())
+  userId   String
+  roomId   String
+  role     RoomMemberRole @default(MEMBER)
+  joinedAt DateTime       @default(now())
+  lastRead DateTime?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, roomId])
+  @@map("room_members")
+}
+
+model Message {
+  id        String      @id @default(cuid())
+  content   String
+  type      MessageType @default(TEXT)
+  userId    String
+  roomId    String
+  replyTo   String?
+  isEdited  Boolean     @default(false)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  user    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  room    Room      @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  parent  Message?  @relation("MessageReply", fields: [replyTo], references: [id])
+  replies Message[] @relation("MessageReply")
 
   @@map("messages")
+}
+
+enum RoomType {
+  PUBLIC
+  PRIVATE
+  DIRECT
+}
+
+enum RoomMemberRole {
+  OWNER
+  ADMIN
+  MODERATOR
+  MEMBER
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  FILE
+  SYSTEM
 }

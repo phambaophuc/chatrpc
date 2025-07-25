@@ -4,7 +4,8 @@ import { ConfigModule } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 
 import { appConfig } from './config';
-import { AuthModule, ChatModule, HealthModule } from './modules';
+import { HealthModule } from './health';
+import { AuthModule, ChatModule, RoomModule } from './modules';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { AuthModule, ChatModule, HealthModule } from './modules';
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: 'schema.gql',
+      sortSchema: true,
       subscriptions: {
         'graphql-ws': true,
         'subscriptions-transport-ws': true,
@@ -27,6 +29,7 @@ import { AuthModule, ChatModule, HealthModule } from './modules';
     }),
     AuthModule,
     ChatModule,
+    RoomModule,
     HealthModule,
   ],
 })

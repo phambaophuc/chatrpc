@@ -30,41 +30,67 @@ export class AuthService implements IAuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
+    await this.updateUserStatus(user.id, true);
+
     const token = this.jwtService.sign({
       sub: user.id,
       username: user.username,
+      email: user.email,
     });
 
     return {
       userId: user.id,
       token,
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        avatar: user.avatar,
+      },
     };
   }
 
   async register(request: IRegisterRequest): Promise<ILoginResponse> {
-    const existingUser = await this.userRepository.existsByUsername(
-      request.username,
-    );
-
-    if (existingUser) {
+    if (await this.userRepository.existsByUsername(request.username)) {
       throw new ConflictException('Username already exists');
+    }
+
+    if (
+      request.email &&
+      (await this.userRepository.existsByEmail(request.email))
+    ) {
+      throw new ConflictException('Email already exists');
     }
 
     const hashedPassword = await User.hashPassword(request.password);
     const user = await this.userRepository.create(
       request.username,
+      request.email || null,
       hashedPassword,
     );
+
+    await this.updateUserStatus(user.id, true);
 
     const token = this.jwtService.sign({
       sub: user.id,
       username: user.username,
+      email: user.email,
     });
 
     return {
       userId: user.id,
       token,
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        avatar: user.avatar,
+      },
     };
+  }
+
+  async updateUserStatus(userId: string, isOnline: boolean): Promise<void> {
+    await this.userRepository.updateUserStatus(userId, isOnline);
   }
 
   async validateUser(userId: string): Promise<User | null> {

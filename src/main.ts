@@ -1,9 +1,6 @@
-import { join } from 'path';
-
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
-import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './shared/filters';
@@ -37,30 +34,6 @@ async function bootstrap() {
       credentials: true,
     });
 
-    // Setup gRPC microservice
-    const grpcPort = configService.get<number>('app.grpcPort');
-    const grpcOptions: MicroserviceOptions = {
-      transport: Transport.GRPC,
-      options: {
-        package: ['auth', 'chat'],
-        protoPath: [
-          join(__dirname, '../proto/auth.proto'),
-          join(__dirname, '../proto/chat.proto'),
-        ],
-        url: `0.0.0.0:${grpcPort}`,
-        maxSendMessageLength: 1024 * 1024 * 4, // 4MB
-        maxReceiveMessageLength: 1024 * 1024 * 4, // 4MB
-      },
-    };
-
-    // Create and start gRPC microservice
-    const grpcApp = await NestFactory.createMicroservice(
-      AppModule,
-      grpcOptions,
-    );
-    await grpcApp.listen();
-    logger.log(`🚀 gRPC server running on localhost:${grpcPort}`);
-
     // Start HTTP server for GraphQL
     const port = configService.get<number>('app.port');
     await app.listen(port || 3000);
@@ -73,7 +46,8 @@ async function bootstrap() {
     // Graceful shutdown
     process.on('SIGTERM', () => {
       logger.log('SIGTERM received, shutting down gracefully');
-      Promise.all([app.close(), grpcApp.close()])
+      app
+        .close()
         .then(() => {
           process.exit(0);
         })

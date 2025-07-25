@@ -2,47 +2,129 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-type LoginResponseDto {
-  userId: String!
-  token: String!
-}
-
-type MessageDto {
-  id: String!
-  userId: String!
-  content: String!
-  timestamp: String!
-}
-
-type Query {
-  getMessages(input: GetMessagesInputDto): [MessageDto!]!
+input CreateRoomInputDto {
+  description: String
+  name: String!
+  type: RoomType!
 }
 
 input GetMessagesInputDto {
-  userId: String
   limit: Int
+  offset: Int
+  roomId: String!
+}
+
+input JoinRoomInputDto {
+  roomId: String!
+}
+
+input LoginInputDto {
+  password: String!
+  username: String!
+}
+
+type LoginResponseDto {
+  token: String!
+  user: UserDto!
+  userId: String!
+}
+
+type MessageDto {
+  content: String!
+  id: String!
+  isEdited: Boolean!
+  replyTo: String
+  replyToMessage: ReplyMessageDto
+  roomId: String!
+  timestamp: String!
+  type: MessageType!
+  user: MessageUserDto!
+  userId: String!
+}
+
+enum MessageType {
+  FILE
+  IMAGE
+  SYSTEM
+  TEXT
+}
+
+type MessageUserDto {
+  avatar: String
+  id: String!
+  username: String!
 }
 
 type Mutation {
+  createRoom(input: CreateRoomInputDto!): RoomDto!
+  deleteMessage(messageId: String!): Boolean!
+  editMessage(content: String!, messageId: String!): MessageDto!
+  joinRoom(input: JoinRoomInputDto!): Boolean!
+  leaveRoom(roomId: String!): Boolean!
   login(input: LoginInputDto!): LoginResponseDto!
+  logout: Boolean!
+  markAsRead(roomId: String!): Boolean!
   register(input: RegisterInputDto!): LoginResponseDto!
   sendMessage(input: SendMessageInputDto!): MessageDto!
 }
 
-input LoginInputDto {
-  username: String!
-  password: String!
+type Query {
+  getRoomMessages(input: GetMessagesInputDto!): [MessageDto!]!
+  getUnreadCount(roomId: String!): Int!
+  myRooms: [RoomDto!]!
+  publicRooms(limit: Int): [RoomDto!]!
 }
 
 input RegisterInputDto {
-  username: String!
+  email: String
   password: String!
+  username: String!
+}
+
+type ReplyMessageDto {
+  content: String!
+  id: String!
+  user: ReplyMessageUserDto!
+}
+
+type ReplyMessageUserDto {
+  username: String!
+}
+
+type RoomDto {
+  avatar: String
+  createdAt: String!
+  creatorId: String!
+  description: String
+  id: String!
+  isActive: Boolean!
+  memberCount: Int!
+  name: String!
+  type: RoomType!
+  unreadCount: Int
+  updatedAt: String!
+}
+
+enum RoomType {
+  DIRECT
+  PRIVATE
+  PUBLIC
 }
 
 input SendMessageInputDto {
   content: String!
+  replyTo: String
+  roomId: String!
+  type: MessageType
 }
 
 type Subscription {
-  messageAdded: MessageDto!
+  roomMessages(roomId: String!): MessageDto!
+}
+
+type UserDto {
+  avatar: String
+  email: String
+  id: String!
+  username: String!
 }

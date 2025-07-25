@@ -1,8 +1,9 @@
 import { Module } from '@nestjs/common';
 
-import { HealthController } from '@/health';
 import { MetricsService } from '@/services';
 import { PrismaService } from '@/shared/services';
+
+import { HealthController } from './health.controller';
 
 @Module({
   providers: [PrismaService, MetricsService],

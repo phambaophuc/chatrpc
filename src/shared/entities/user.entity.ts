@@ -1,10 +1,20 @@
 import { compare, hash } from 'bcrypt';
 
+export enum UserStatus {
+  ONLINE = 'ONLINE',
+  OFFLINE = 'OFFLINE',
+  AWAY = 'AWAY',
+}
+
 export class User {
   constructor(
     public readonly id: string,
     public readonly username: string,
+    public readonly email: string | null,
     private readonly password: string,
+    public readonly avatar: string | null = null,
+    public readonly isOnline: boolean = false,
+    public readonly lastSeen: Date = new Date(),
     public readonly createdAt?: Date,
     public readonly updatedAt?: Date,
   ) {}
@@ -22,6 +32,10 @@ export class User {
     return {
       id: this.id,
       username: this.username,
+      email: this.email,
+      avatar: this.avatar,
+      isOnline: this.isOnline,
+      lastSeen: this.lastSeen,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
     };

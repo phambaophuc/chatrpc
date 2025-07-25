@@ -12,7 +12,7 @@
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
-    "db:migrate": "prisma migrate dev",
+    "db:migrate": "prisma migrate dev --name init",
     "db:generate": "prisma generate",
     "db:seed": "prisma db seed",
     "db:studio": "prisma studio",
@@ -24,15 +24,13 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "@grpc/grpc-js": "^1.13.4",
-    "@grpc/proto-loader": "^0.7.15",
+    "@faker-js/faker": "^9.9.0",
     "@nestjs/apollo": "^13.1.0",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.0.1",
     "@nestjs/graphql": "^13.1.0",
     "@nestjs/jwt": "^11.0.0",
-    "@nestjs/microservices": "^11.1.5",
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/typeorm": "^11.0.0",
@@ -101,5 +99,8 @@
   },
   "lint-staged": {
     "*.{ts,js}": "eslint --fix"
+  },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
   }
 }

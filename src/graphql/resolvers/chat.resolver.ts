@@ -3,7 +3,7 @@ import { PubSub } from 'graphql-subscriptions';
 import { UseGuards } from '@nestjs/common';
 import {
   Args,
-  Context,
+  Int,
   Mutation,
   Query,
   Resolver,
@@ -12,9 +12,9 @@ import {
 
 import { JwtAuthGuard } from '@/auth';
 import { ChatService } from '@/services';
+import { CurrentUser } from '@/shared/decorators';
 
 import { GetMessagesInputDto, MessageDto, SendMessageInputDto } from '../dtos';
-import { GqlContextType } from '../interfaces';
 
 const pubSub = new PubSub();
 
@@ -22,34 +22,89 @@ const pubSub = new PubSub();
 export class ChatResolver {
   constructor(private readonly chatService: ChatService) {}
 
-  @UseGuards(JwtAuthGuard)
   @Mutation(() => MessageDto)
+  @UseGuards(JwtAuthGuard)
   async sendMessage(
     @Args('input') input: SendMessageInputDto,
-    @Context() context: GqlContextType,
+    @CurrentUser() user: any,
   ): Promise<MessageDto> {
-    const userId = context.req.user.userId;
-    const message = await this.chatService.sendMessage({
-      userId,
-      content: input.content,
-    });
+    const message = await this.chatService.sendMessage(user.userId, input);
 
     // Publish to GraphQL subscription
-    await pubSub.publish('messageAdded', { messageAdded: message });
+    await pubSub.publish(`room_${input.roomId}`, { roomMessages: message });
 
     return message;
   }
 
-  @UseGuards(JwtAuthGuard)
   @Query(() => [MessageDto])
-  async getMessages(
-    @Args('input', { nullable: true }) input?: GetMessagesInputDto,
+  @UseGuards(JwtAuthGuard)
+  async getRoomMessages(
+    @Args('input') input: GetMessagesInputDto,
+    @CurrentUser() user: any,
   ): Promise<MessageDto[]> {
-    return await this.chatService.getMessages(input?.userId, input?.limit);
+    return await this.chatService.getRoomMessages(
+      user.userId,
+      input.roomId,
+      input.limit,
+      input.offset,
+    );
   }
 
-  @Subscription(() => MessageDto)
-  messageAdded() {
-    return pubSub.asyncIterableIterator('messageAdded');
+  @Mutation(() => MessageDto)
+  @UseGuards(JwtAuthGuard)
+  async editMessage(
+    @Args('messageId') messageId: string,
+    @Args('content') content: string,
+    @CurrentUser() user: any,
+  ): Promise<MessageDto> {
+    const message = await this.chatService.editMessage(
+      user.userId,
+      messageId,
+      content,
+    );
+
+    // Publish update to subscription
+    await pubSub.publish(`room_${message.roomId}`, { roomMessages: message });
+
+    return message;
+  }
+
+  @Mutation(() => Boolean)
+  @UseGuards(JwtAuthGuard)
+  async deleteMessage(
+    @Args('messageId') messageId: string,
+    @CurrentUser() user: any,
+  ): Promise<boolean> {
+    await this.chatService.deleteMessage(user.userId, messageId);
+    return true;
+  }
+
+  @Mutation(() => Boolean)
+  @UseGuards(JwtAuthGuard)
+  async markAsRead(
+    @Args('roomId') roomId: string,
+    @CurrentUser() user: any,
+  ): Promise<boolean> {
+    await this.chatService.markAsRead(user.userId, roomId);
+    return true;
+  }
+
+  @Query(() => Int)
+  @UseGuards(JwtAuthGuard)
+  async getUnreadCount(
+    @Args('roomId') roomId: string,
+    @CurrentUser() user: any,
+  ): Promise<number> {
+    return await this.chatService.getUnreadCount(user.userId, roomId);
+  }
+
+  @Subscription(() => MessageDto, {
+    filter: (payload, variables) => {
+      // Only send messages to users who are members of the room
+      return payload.roomMessages.roomId === variables.roomId;
+    },
+  })
+  roomMessages(@Args('roomId') roomId: string) {
+    return pubSub.asyncIterableIterator(`room_${roomId}`);
   }
 }
