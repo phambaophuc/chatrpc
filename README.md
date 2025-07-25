@@ -30,7 +30,6 @@ A scalable real-time chat system built with NestJS, GraphQL, gRPC, PostgreSQL, a
 
 - 🔐 JWT Authentication with bcrypt password hashing
 - 💬 Real-time messaging with GraphQL subscriptions
-- 🚀 High-performance gRPC API
 - 🗄️ PostgreSQL database with Prisma ORM
 - 🎯 SOLID principles and clean architecture
 - 🔒 Rate limiting and security measures
@@ -42,9 +41,9 @@ A scalable real-time chat system built with NestJS, GraphQL, gRPC, PostgreSQL, a
 
 - **Backend**: NestJS, TypeScript
 - **Database**: PostgreSQL with Prisma ORM
-- **APIs**: GraphQL (Apollo Server), gRPC
+- **APIs**: GraphQL (Apollo Server)
 - **Authentication**: JWT with Passport
-- **Real-time**: WebSocket subscriptions, gRPC streaming
+- **Real-time**: WebSocket subscriptions
 - **Testing**: Jest
 
 ## Quick Start
@@ -109,28 +108,6 @@ subscription {
 }
 ```
 
-### gRPC Examples
-
-```typescript
-// Login
-const response = await authClient.login({
-  username: "john_doe",
-  password: "password123"
-});
-
-// Send message
-const message = await chatClient.sendMessage({
-  userId: "user_id",
-  content: "Hello from gRPC!"
-});
-
-// Stream messages
-const stream = chatClient.streamMessages({ userId: "user_id" });
-stream.on('data', (message) => {
-  console.log('New message:', message);
-});
-```
-
 ## Architecture
 
 The application follows clean architecture principles with clear separation of concerns:
@@ -182,11 +159,12 @@ npm run db:studio
 ## Environment Variables
 
 ```bash
+PORT=3000
+NODE_ENV=development
+UPLOAD_DIR="./uploads"
+MAX_FILE_SIZE=10485760
 DATABASE_URL=postgresql://username:password@localhost:5432/chat_db
 JWT_SECRET=your-super-secret-jwt-key
-NODE_ENV=development
-PORT=3000
-GRPC_PORT=5000
 ```
 
 ## License
