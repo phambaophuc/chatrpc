@@ -84,30 +84,8 @@ mutation {
     token
   }
 }
-
-# Send message (requires authentication)
-mutation {
-  sendMessage(input: {
-    content: "Hello World!"
-  }) {
-    id
-    userId
-    content
-    timestamp
-  }
-}
-
-# Subscribe to messages
-subscription {
-  messageAdded {
-    id
-    userId
-    content
-    timestamp
-  }
-}
 ```
-
+📝 Note: For full schema and advanced operations like messaging or subscriptions, refer to the GraphQL schema documentation or use the Playground.
 ## Architecture
 
 The application follows clean architecture principles with clear separation of concerns:
